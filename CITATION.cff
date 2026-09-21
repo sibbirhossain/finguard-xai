@@ -2,9 +2,25 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it."
 title: "FinGuard-XAI: Real-Time Graph Intelligence for Financial Fraud Detection"
 authors:
-  - family-names: Hossain
-    given-names: Md Sibbir
-    orcid: "https://orcid.org/0009-0002-0795-4512"
+    authors:
+    - family-names: Zakaria
+      given-names: R. M.
+    - family-names: Rahman
+      given-names: M. M.
+    - family-names: Choudhury
+      given-names: M. T. H.
+    - family-names: Rahman
+      given-names: H.
+    - family-names: Rafi
+      given-names: M. A.
+    - family-names: Minto
+      given-names: A.
+    - family-names: Hossain
+      given-names: Md Sibbir
+      orcid: "https://orcid.org/0009-0002-0795-4512"
+    - family-names: Saimon
+      given-names: S. I.
+  
 version: 1.1.0
 license: MIT
 references:
