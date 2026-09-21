@@ -1,0 +1,31 @@
+{
+  "seed": 1,
+  "none": {
+    "gnn_ring_recall": 1.0,
+    "dual_ring_recall": 1.0,
+    "gnn_fpr": 0.004273504273504274,
+    "dual_fpr": 0.013149243918474688,
+    "n_ring": 35
+  },
+  "device_dispersion": {
+    "gnn_ring_recall": 1.0,
+    "dual_ring_recall": 1.0,
+    "gnn_fpr": 0.004273504273504274,
+    "dual_fpr": 0.013477975016436555,
+    "n_ring": 35
+  },
+  "camouflage": {
+    "gnn_ring_recall": 0.9428571428571428,
+    "dual_ring_recall": 0.9714285714285714,
+    "gnn_fpr": 0.0046022353714661405,
+    "dual_fpr": 0.015450361604207758,
+    "n_ring": 35
+  },
+  "combined": {
+    "gnn_ring_recall": 1.0,
+    "dual_ring_recall": 1.0,
+    "gnn_fpr": 0.004273504273504274,
+    "dual_fpr": 0.015121630506245891,
+    "n_ring": 35
+  }
+}
