@@ -41,3 +41,4 @@ def test_train_and_api(tmp_path: Path, monkeypatch) -> None:
         assert 0.0 <= body["risk_score"] <= 1.0
         assert body["latency_ms"]["scoring_total"] > 0
         assert client.get("/api/v1/stats").json()["processed"] == 1
+        assert client.get("/api/v1/drift").json()["status"] == "insufficient data"
