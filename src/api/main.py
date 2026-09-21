@@ -21,6 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..models.pipeline import FinGuardEngine
+from ..monitoring.drift import DriftMonitor
 
 ARTIFACT_DIR = Path(os.getenv("FINGUARD_ARTIFACTS", "artifacts"))
 API_KEY = os.getenv("FINGUARD_API_KEY")
@@ -45,6 +46,7 @@ class State:
     """Process-wide engine and rolling history (single-worker deployment)."""
 
     engine: Optional[FinGuardEngine] = None
+    drift: Optional[DriftMonitor] = None
     lock = threading.Lock()  # guards graph updates + scoring
     explain_lock = threading.Lock()  # guards the explainer's model copy
     recent: deque[dict[str, Any]] = deque(maxlen=HISTORY)
@@ -60,10 +62,11 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     torch.set_num_threads(int(os.getenv("FINGUARD_TORCH_THREADS", "1")))
     if (ARTIFACT_DIR / "model.pt").exists():
         State.engine = FinGuardEngine.load(ARTIFACT_DIR)
+        State.drift = DriftMonitor(State.engine.scorer._legit_sorted)
     yield
 
 
-app = FastAPI(title="FinGuard-XAI", version="1.0.0", lifespan=lifespan,
+app = FastAPI(title="FinGuard-XAI", version="1.2.0", lifespan=lifespan,
               description="Real-time graph intelligence for financial fraud detection (research prototype).")
 app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["GET", "POST"], allow_headers=["*"])
 
@@ -99,6 +102,8 @@ def score_transaction(txn: TransactionIn, explain: bool = Query(True, descriptio
     with State.lock:
         State.processed += 1
         State.latencies.append(result["latency_ms"]["scoring_total"])
+        if State.drift is not None:
+            State.drift.update(result["components"]["anomaly_score"])
         feed_item = {k: result[k] for k in ("txn_id", "card_id", "merchant_id", "amount", "timestamp",
                                             "risk_score", "is_alert")}
         State.recent.append(feed_item)
@@ -135,3 +140,10 @@ def stats() -> dict[str, Any]:
         "graph_nodes": get_engine().graph.num_nodes if State.engine else 0,
         "threshold": round(State.engine.scorer.threshold, 4) if State.engine else None,
     }
+
+
+@app.get("/api/v1/drift", dependencies=[Depends(require_key)])
+def drift() -> dict[str, Any]:
+    """Population Stability Index of live traffic vs the calibration reference."""
+    get_engine()
+    return State.drift.status() if State.drift else {"status": "unavailable"}
