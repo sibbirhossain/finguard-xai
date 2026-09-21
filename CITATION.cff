@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it."
+title: "FinGuard-XAI: Real-Time Graph Intelligence for Financial Fraud Detection"
+authors:
+  - family-names: Hossain
+    given-names: Md Sibbir
+    orcid: "https://orcid.org/0009-0002-0795-4512"
+version: 1.1.0
+license: MIT
+references:
+  - type: article
+    title: "Detecting Financial Fraud in Real-Time Transactions Using Graph Neural Networks and Anomaly Detection Techniques"
+    journal: "Journal of Economics, Finance and Accounting Studies"
+    volume: 7
+    issue: 6
+    year: 2025
+    doi: 10.32996/jefas.2025.7.6.1

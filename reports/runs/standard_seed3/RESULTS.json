@@ -1,0 +1,106 @@
+{
+  "label": "OBSERVED IN THIS IMPLEMENTATION - SYNTHETIC DATA",
+  "timestamp": "2026-09-21 06:07:26",
+  "environment": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "platform": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "torch_threads": 1
+  },
+  "metadata": {
+    "holdout_scenario": null,
+    "dataset": "synthetic",
+    "arch": "sage",
+    "detector": "deep_svdd",
+    "seed": 3,
+    "epochs": 6,
+    "fusion_weights": {
+      "supervised_logit": 0.906907530372226,
+      "log_anomaly": 0.0006104710827437969,
+      "intercept": -2.2704252474278577,
+      "novelty_fpr_budget": 0.005
+    },
+    "threshold": 0.6427567690538875,
+    "novelty_threshold": 0.012987632304430008,
+    "data": "SYNTHETIC (src/api/stream_simulator.py)",
+    "n_transactions": 20749,
+    "fraud_rate": {
+      "train": 0.032842192233544475,
+      "val": 0.05623393316195373,
+      "test": 0.031159653067780277
+    }
+  },
+  "results_test": {
+    "tabular_gbdt_no_graph": {
+      "pr_auc": 0.7236536478499387,
+      "roc_auc": 0.9351380267439634,
+      "precision": 0.4807692307692308,
+      "recall": 0.7731958762886598,
+      "f1": 0.5928853754940712,
+      "fpr": 0.026856763925729443,
+      "alerts": 156
+    },
+    "anomaly_only": {
+      "pr_auc": 0.5617956459648014,
+      "roc_auc": 0.9533518827422134,
+      "precision": 0.37948717948717947,
+      "recall": 0.7628865979381443,
+      "f1": 0.5068493150684932,
+      "fpr": 0.04011936339522546,
+      "alerts": 195
+    },
+    "gnn_only": {
+      "pr_auc": 0.9102321884363545,
+      "roc_auc": 0.9964690038010338,
+      "precision": 0.8,
+      "recall": 0.865979381443299,
+      "f1": 0.8316831683168318,
+      "fpr": 0.006962864721485411,
+      "alerts": 105
+    },
+    "hybrid_gnn_plus_anomaly": {
+      "pr_auc": 0.7616990869152545,
+      "roc_auc": 0.9936865924690312,
+      "precision": 0.7203389830508474,
+      "recall": 0.8762886597938144,
+      "f1": 0.7906976744186046,
+      "fpr": 0.010941644562334218,
+      "alerts": 118
+    }
+  },
+  "hybrid_recall_by_scenario": {
+    "ato": 0.8292682926829268,
+    "ring": 0.9107142857142857
+  },
+  "gnn_recall_by_scenario": {
+    "ato": 0.8048780487804879,
+    "ring": 0.9107142857142857
+  },
+  "latency": {
+    "n_scored": 200,
+    "scoring_ms": {
+      "p50": 3.774,
+      "p95": 4.394,
+      "p99": 4.694
+    },
+    "n_explained": 9,
+    "explanation_ms": {
+      "p50": 100.56,
+      "p95": 104.31
+    }
+  },
+  "timings_s": {
+    "graph_build_s": 45.96,
+    "gnn_train_s": 14.23,
+    "anomaly_fit_s": 1.13
+  },
+  "train_loss": [
+    0.7585273227541285,
+    0.36876177463985216,
+    0.32007329408063995,
+    0.31720132293106273,
+    0.2780268110952506,
+    0.25615474356313245
+  ]
+}
