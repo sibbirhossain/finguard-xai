@@ -127,7 +127,10 @@ IEEE-CIS multi-seed results · adversarial tests (edge injection, device dispers
 ## Author
 **Md Sibbir Hossain** (M.S. Computer Science, The City College of New York) · [ORCID 0009-0002-0795-4512](https://orcid.org/0009-0002-0795-4512).
 Software engineer building payment-integrity data systems for U.S. healthcare, including Medicaid billing automation and Electronic Visit Verification (EVV) compliance.
-This project extends the architecture described in a paper he co-authored: *"Detecting Financial Fraud in Real-Time Transactions Using Graph Neural Networks and Anomaly Detection Techniques"* (JEFAS 7(6), 2025, [doi:10.32996/jefas.2025.7.6.1](https://doi.org/10.32996/jefas.2025.7.6.1)). The novelty channel, point-in-time evaluation, multi-seed study, and open implementation are new in this repository.
+This project extends the architecture described in the co-authored paper:
+Zakaria, R. M., Rahman, M. M., Choudhury, M. T. H., Rahman, H., Rafi, M. A., Minto, A., **Hossain, M. S.**, & Saimon, S. I. (2025). *Detecting Financial Fraud in Real-Time Transactions Using Graph Neural Networks and Anomaly Detection Techniques.* Journal of Economics, Finance and Accounting Studies, 7(6), 1–13. [doi:10.32996/jefas.2025.7.6.1](https://doi.org/10.32996/jefas.2025.7.6.1)
+
+The novelty channel, point-in-time evaluation, multi-seed study, and open-source implementation in this repository are new work by Md Sibbir Hossain.
 
 ## Citation
 See [`CITATION.cff`](CITATION.cff). License: MIT.
