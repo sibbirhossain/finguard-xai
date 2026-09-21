@@ -3,7 +3,7 @@
 
 [![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sibbirhossain/finguard-xai/blob/main/notebooks/01_problem_and_motivation.ipynb)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue) ![PyG](https://img.shields.io/badge/PyTorch%20Geometric-2.5%2B-orange) ![License](https://img.shields.io/badge/license-MIT-green)
+[![Preprint](https://img.shields.io/badge/preprint-PDF-b31b1b)](paper/finguard_xai.pdf) ![Python](https://img.shields.io/badge/python-3.10%2B-blue) ![PyG](https://img.shields.io/badge/PyTorch%20Geometric-2.5%2B-orange) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
 
@@ -25,7 +25,8 @@ FinGuard-XAI models every payment as part of a **live, time-aware graph** of car
 2. **Temporal graph neural network.** GraphSAGE or GAT with learned time encoding, trained on the transaction's 2-hop neighborhood.
 3. **Dual-channel alerting.** A supervised channel handles known fraud patterns. An independent **novelty channel** (Deep SVDD with a fixed, auditable false-positive budget) catches fraud types the model has **never seen**.
 4. **Explanation for every alert.** GNNExplainer shows analysts which devices, IPs, merchants, and links drove the decision.
-5. **Production-style service.** FastAPI scoring API, live React dashboard, measured p50/p95/p99 latency, tests, and CI.
+5. **Adversarial robustness testing.** Detection is measured under simulated evasion attacks (device dispersion, camouflage).
+6. **Production-style service.** FastAPI scoring API, live React dashboard, measured p50/p95/p99 latency, tests, and CI.
 
 ## Key results — 5 independent seeds, 95% confidence intervals
 Source: [`reports/EXPERIMENTS.md`](reports/EXPERIMENTS.md), reproducible with one command. Controlled synthetic data with documented fraud scenarios; a public-benchmark pipeline is included ([notebook 07](https://colab.research.google.com/github/sibbirhossain/finguard-xai/blob/main/notebooks/07_public_benchmark_ieee_cis.ipynb)).
@@ -44,6 +45,17 @@ Source: [`reports/EXPERIMENTS.md`](reports/EXPERIMENTS.md), reproducible with on
 | Known fraud rings caught | 94.8% | **95.6%** |
 | False-positive rate | 0.19% | 0.91% (the stated cost of the novelty budget) |
 
+**Adaptive attackers.** The system was frozen after training, and fraud rings then tried to evade it:
+
+| Attack on fraud rings | Supervised GNN only | **+ dual-channel** |
+|---|---|---|
+| None | 97.3% caught | 97.3% |
+| Device dispersion (fresh device and IP per purchase) | 98.1% | 98.8% |
+| Camouflage (benign purchases mixed in) | 91.8% | **96.8%** |
+| Combined attack | 83.9% ± 20.1% (unstable) | **97.6% ± 3.0%** |
+
+The dual channel keeps detection stable under attack; the cost is a false-positive rate of about 1.4% vs 0.6%. See [`reports/robustness/ROBUSTNESS.md`](reports/robustness/ROBUSTNESS.md) and [notebook 08](https://colab.research.google.com/github/sibbirhossain/finguard-xai/blob/main/notebooks/08_adversarial_robustness.ipynb).
+
 **Real-time performance.**
 - Scoring (graph update + GNN + anomaly + fusion): **p95 4.7 ms per transaction on a single CPU thread**, about 260 transactions/second per thread.
 - Explanations take about 100 ms, run only for alerts, and are kept off the scoring path.
@@ -57,9 +69,10 @@ Source: [`reports/EXPERIMENTS.md`](reports/EXPERIMENTS.md), reproducible with on
 | [04 · Never-Seen Fraud](https://colab.research.google.com/github/sibbirhossain/finguard-xai/blob/main/notebooks/04_unseen_fraud_generalization.ipynb) | The generalization problem, the design fix, and its measured trade-off |
 | [05 · Real-Time Performance](https://colab.research.google.com/github/sibbirhossain/finguard-xai/blob/main/notebooks/05_realtime_performance.ipynb) | Latency distribution over 2,000 live scoring calls |
 | [06 · Operational Impact](https://colab.research.google.com/github/sibbirhossain/finguard-xai/blob/main/notebooks/06_impact_scenario_analysis.ipynb) | Scenario model converting measured detection rates into alert volume and dollars (editable assumptions) |
+| [08 · Adversarial Robustness](https://colab.research.google.com/github/sibbirhossain/finguard-xai/blob/main/notebooks/08_adversarial_robustness.ipynb) | How detection holds up when fraud rings actively evade it |
 | [07 · Public Benchmark](https://colab.research.google.com/github/sibbirhossain/finguard-xai/blob/main/notebooks/07_public_benchmark_ieee_cis.ipynb) | Same pipeline on the public IEEE-CIS dataset (590k real anonymized transactions) |
 
-Notebooks 01–06 are committed **with their outputs**, so every chart is visible on GitHub without running anything.
+Notebooks 01–06 and 08 are committed **with their outputs**, so every chart is visible on GitHub without running anything.
 
 ## Architecture
 ```mermaid
@@ -100,6 +113,8 @@ The method needs only pseudonymous identifiers (card, device, merchant, network)
 pip install torch --index-url https://download.pytorch.org/whl/cpu && pip install -r requirements.txt
 python -m src.models.train                          # train + evaluate (~1-2 min)
 python -m src.experiments.run_experiments           # full 5-seed suite (~12 min)
+python -m src.experiments.robustness --seed 0 1 2 3 4 --aggregate   # adversarial study (~10 min)
+python paper/make_paper.py && cd paper && pdflatex finguard_xai.tex   # rebuild the preprint from reports/
 uvicorn src.api.main:app --port 8000                # API docs at /docs
 python -m src.api.stream_simulator --n 3000 --rate 100
 cd frontend && npm install && npm run dev           # dashboard at localhost:5173
@@ -111,6 +126,7 @@ Public data: `python -m src.models.train --data ieee-cis --data-dir data/ieee-ci
 |---|---|---|
 | POST | `/api/v1/transactions` | `risk_score`, `is_alert`, `alert_reason` (known / novel pattern), component scores, latency breakdown, explanation |
 | GET | `/api/v1/alerts` · `/api/v1/transactions/recent` · `/api/v1/stats` · `/health` | Alerts, live feed, risk histogram + latency percentiles, health |
+| GET | `/api/v1/drift` | Population Stability Index of live traffic vs. calibration data (stable / moderate / significant shift) |
 
 Security: optional API-key auth (`FINGUARD_API_KEY`), strict input validation, restricted CORS. Only pseudonymous identifiers are accepted, never raw personal data. Load only model artifacts you trained yourself.
 
@@ -119,18 +135,18 @@ Security: optional API-key auth (`FINGUARD_API_KEY`), strict input validation, r
 - Explanations describe model behavior. They are not proof of fraud or causality.
 - The novelty channel increases false positives in exchange for catching unseen fraud; the budget is configurable.
 - Single-process in-memory graph. Horizontal scaling would require a shared graph store.
-- No adversarial-robustness evaluation yet.
+- Adversarial tests use heuristic attackers; white-box attacks with knowledge of the model are not yet evaluated. Ring counts per test window are small (32–125), so robustness estimates carry high variance.
 
 ## Roadmap
-IEEE-CIS multi-seed results · adversarial tests (edge injection, device dispersion) · drift monitoring · preprint and archived release (DOI).
+IEEE-CIS multi-seed results · white-box adversarial evaluation · automated drift-triggered retraining · archived release with DOI.
 
 ## Author
 **Md Sibbir Hossain** (M.S. Computer Science, The City College of New York) · [ORCID 0009-0002-0795-4512](https://orcid.org/0009-0002-0795-4512).
 Software engineer building payment-integrity data systems for U.S. healthcare, including Medicaid billing automation and Electronic Visit Verification (EVV) compliance.
-This project extends the architecture described in the co-authored paper:
-Zakaria, R. M., Rahman, M. M., Choudhury, M. T. H., Rahman, H., Rafi, M. A., Minto, A., **Hossain, M. S.**, & Saimon, S. I. (2025). *Detecting Financial Fraud in Real-Time Transactions Using Graph Neural Networks and Anomaly Detection Techniques.* Journal of Economics, Finance and Accounting Studies, 7(6), 1–13. [doi:10.32996/jefas.2025.7.6.1](https://doi.org/10.32996/jefas.2025.7.6.1)
+This project extends the architecture described in a paper he co-authored: *"Detecting Financial Fraud in Real-Time Transactions Using Graph Neural Networks and Anomaly Detection Techniques"* (JEFAS 7(6), 2025, [doi:10.32996/jefas.2025.7.6.1](https://doi.org/10.32996/jefas.2025.7.6.1)). The novelty channel, point-in-time evaluation, multi-seed study, and open implementation are new in this repository.
 
-The novelty channel, point-in-time evaluation, multi-seed study, and open-source implementation in this repository are new work by Md Sibbir Hossain.
+## Preprint
+[**Dual-Channel Temporal Graph Learning for Real-Time Detection of Coordinated and Previously Unseen Payment Fraud**](paper/finguard_xai.pdf). Every number in the paper is generated from `reports/` by `paper/make_paper.py`.
 
 ## Citation
 See [`CITATION.cff`](CITATION.cff). License: MIT.
