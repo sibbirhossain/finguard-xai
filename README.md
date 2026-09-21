@@ -1,6 +1,7 @@
 # FinGuard-XAI
 ### Real-Time, Explainable Graph AI for Detecting Coordinated Payment Fraud
 
+[![DOI](https://zenodo.org/badge/1379192313.svg)](https://doi.org/10.5281/zenodo.22869687)
 [![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sibbirhossain/finguard-xai/blob/main/notebooks/01_problem_and_motivation.ipynb)
 [![Preprint](https://img.shields.io/badge/preprint-PDF-b31b1b)](paper/finguard_xai.pdf) ![Python](https://img.shields.io/badge/python-3.10%2B-blue) ![PyG](https://img.shields.io/badge/PyTorch%20Geometric-2.5%2B-orange) ![License](https://img.shields.io/badge/license-MIT-green)
